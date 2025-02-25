@@ -46,6 +46,18 @@ export const getAllPosts = async (req, res) => {
         })
     }
 }
+export const getPostByTag = async (req, res) => {
+    try {
+        const {tag} = req.params;
+        const posts = await PostModel.find({tags: { $in: [tag]}});
+        res.status(200).json(posts)
+    } catch (e) {
+        console.log(e);
+        res.status(500).json({
+            message: 'Не удалось получить статьи через теги',
+        })
+    }
+}
 export const getOnePost = async (req, res) => {
     try{
         const postId = req.params.id;
