@@ -23,6 +23,16 @@ import mongoose from "mongoose";
             ref: 'User',
             required: true
         },
+        comments: [
+            {
+                user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
+                text: String,
+                createdAt: {
+                    type: Date,
+                    default: Date.now()
+                }
+            }
+        ],
         imageUrl: String
     },
     {

@@ -1,4 +1,5 @@
 import PostModel from "../model/Post.js";
+import UserModel from "../model/User.js";
 
 export const createPosts = async (req, res) => {
     try{
@@ -89,7 +90,11 @@ export const getOnePost = async (req, res) => {
                 }
                 res.json(doc);
             },
-        ).populate('author');
+        ).populate('author')
+            .populate({
+            path: 'comments.user',
+            select: 'fullName avatarUrl'
+        });
     } catch (error) {
         console.log(error)
         res.status(500).json({
@@ -157,5 +162,38 @@ export const updatePost = async (req,res) => {
         res.status(500).json({
             message: 'Не удалось обновить статью'
         });
+    }
+}
+
+export const addComment = async (req, res) => {
+    try{
+        const { postId, text } = req.body;
+        const userId = req.userId;
+
+        const post =  await PostModel.findById(postId);
+        if (!post){
+            return res.status(404).json({ message: 'Пост не найден' })
+        }
+
+        const user = await UserModel.findById(userId)
+            .select('-email -passwordHash -updatedAt')
+        if (!user){
+            return res.status(404).json({ message: 'Пользователь не найден' });
+        }
+
+        const newComment = {
+            user: user,
+            text,
+        }
+
+        post.comments.push(newComment);
+        await post.save()
+
+        res.json(newComment)
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({
+            message: 'Не удалось добавить коментарий'
+        })
     }
 }
