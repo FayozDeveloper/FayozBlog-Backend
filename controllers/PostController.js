@@ -34,9 +34,12 @@ export const getLastTags = async (req, res) => {
 }
 export const getAllPosts = async (req, res) => {
     try{
-        // .populate({path: "author", select:["fullName", "imageUrl"]})
-        // .populate('user', '-passwordHash').exec()  в полученных полях пофиксить passwordHash
-        const posts = await PostModel.find().populate('author').exec();
+        const {tab} = req.query
+        const sortBy = tab === "1" ? {views: -1} : {createdAt: -1};
+
+        const posts = await PostModel.find()
+            .sort(sortBy)
+            .populate('author', '-passwordHash').exec();
 
         res.json(posts)
     } catch (e) {
